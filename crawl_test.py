@@ -7,6 +7,7 @@ import itertools
 import os
 import imghdr
 import time
+import codecs
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -59,9 +60,12 @@ def img_handler(imgs,url):
 			if file_name == '':
 				file_name = "not_real_name.jpg" #temp name for "not" pictures
 			print img.encode('utf-8')
-			coded_file_name = file_name.encode('utf-8')
+			#coded_file_name = file_name.encode('utf-8')
+			coded_file_name = codecs.encode(file_name,'cp1255')
 			try:
 				download_pic(img, r'C:\Users\user\Documents\Crawler\{0}.jpg'.format(coded_file_name))
+			except UnicodeEncodeError:
+				coded_file_name = codecs.encode(file_name,'utf-8')
 			except:
 				names += coded_file_name + ' , '
 				print "The Website has a problem with the picture. Check names.txt"
