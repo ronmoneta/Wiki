@@ -16,6 +16,18 @@ from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 from PIL import Image
 
+URL = "http://www.zionistarchives.org.il/"
+PARSER = 'html.parser'
+PIC_LOCAL_LINK = r'C:\Users\user\Documents\Crawler\{0}.jpg'
+DEBUG_FILE = r"C:\Users\user\Documents\Crawler\names.txt"
+HEADER = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36',
+       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+       'Accept-Language': 'en-US,en;q=0.8',
+       #'Accept-Encoding': 'gzip',
+       'Upgrade-Insecure-Requests': '1',
+       'Connection': 'keep-alive'}
+
 def crawler(url):
 	urls = [url]
 	visited = [url]
@@ -26,7 +38,7 @@ def crawler(url):
 			#browser,results = parse_js(urls[0])
 			#htmltext = browser.page_source
 			htmltext = connect(urls[0])
-			soup = BeautifulSoup(htmltext,'html.parser')
+			soup = BeautifulSoup(htmltext, PARSER)
 			print urls[0]
 			urls.pop(0)
 			for tag in soup.findAll('a',href=True):
@@ -47,7 +59,7 @@ def crawler(url):
 	#browser.quit()
 
 def img_handler(imgs,url):
-	#
+	#Recives list of imgs and the relevant url. try to download the imgs and save them locally.
 	names = ''
 	for img in imgs:
 		if url not in img and 'http' not in img:
@@ -63,13 +75,13 @@ def img_handler(imgs,url):
 			#coded_file_name = file_name.encode('utf-8')
 			coded_file_name = codecs.encode(file_name,'cp1255')
 			try:
-				download_pic(img, r'C:\Users\user\Documents\Crawler\{0}.jpg'.format(coded_file_name))
+				download_pic(img, PIC_LOCAL_LINK.format(coded_file_name))
 			except UnicodeEncodeError:
 				coded_file_name = codecs.encode(file_name,'utf-8')
 			except:
 				names += coded_file_name + ' , '
 				print "The Website has a problem with the picture. Check names.txt"
-	with open (r"C:\Users\user\Documents\Crawler\names.txt",'wb') as f:
+	with open (DEBUG_FILE,'wb') as f:
 		f.write(names)
 
 def RateLimited(maxPerSecond):
@@ -90,15 +102,8 @@ def RateLimited(maxPerSecond):
 
 #@RateLimited(0.6)
 def connect(url):
-	#
-	hdr = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36',
-       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-       'Accept-Language': 'en-US,en;q=0.8',
-       #'Accept-Encoding': 'gzip',
-       'Upgrade-Insecure-Requests': '1',
-       'Connection': 'keep-alive'}
-	req = urllib2.Request(url, headers=hdr)
+	#Recives urls. connects to the website and returns the pagesource.
+	req = urllib2.Request(url, headers=HEADER)
 	#req.add_header('User-agent', 'Mozilla 5.10')
 	#req.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
 	res = urllib2.urlopen(req)
@@ -150,10 +155,9 @@ def parse_js(url):
 	return browser, results
 
 def main():
-	url = "http://www.zionistarchives.org.il/" #"http://www.zionistarchives.org.il"
-	crawler(url)
+	crawler(URL)
 
 if __name__ == "__main__":
 	main()
-#TODO: Why does the JS returns only the first article/link? make JS part and HTML part work together.
-#Make CONSTS. fix random urls not working (401). Fix HEB names
+
+#For the State Archive: Why does the JS returns only the first article/link? make JS part and HTML part work together.
